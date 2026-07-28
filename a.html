@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A학교 재학생 현황 인포그래픽 생성기</title>
+
+    <!-- Pretendard Web Font CDN -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome Icon CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SheetJS CDN (Excel parsing) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- Chart.js CDN & ChartJS DataLabels Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+
+    <!-- html2canvas CDN (HD PNG Export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        * {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Responsive Dashboard Container with Aspect Preserving Width */
+        .infographic-wrapper {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Fixed export target canvas dimensions for crisp PNG export */
+        .infographic-card {
+            background: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 1240px;
+            margin: 0 auto;
+            position: relative;
+            transform-origin: top center;
+        }
+
+        /* Donut Chart Wrapper */
+        .donut-wrapper {
+            position: relative;
+            width: 135px;
+            height: 135px;
+        }
+
+        .dropzone-active {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+
+        .toast-msg {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between p-2 sm:p-4">
+
+    <header class="w-full max-w-7xl mx-auto mb-3">
+        <div class="bg-slate-900/90 backdrop-blur-md rounded-2xl p-3 px-5 border border-slate-800 shadow-lg flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2 px-3 rounded-xl font-black text-sm tracking-wider flex items-center shadow-md">
+                    <i class="fa-solid fa-chart-pie me-2"></i> A-SCHOOL
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold text-white tracking-tight leading-tight">재학생 현황 데이터 시각화 & 인포그래픽</h1>
+                    <p class="text-[11px] text-slate-400">엑셀 데이터 자동 파싱 · 한 화면 맞춤 대시보드 · 고화질 PNG 다운로드</p>
+                </div>
+            </div>
+
+            <!-- Upload Controls & Export CTAs -->
+            <div class="flex items-center flex-wrap justify-end gap-2 w-full md:w-auto">
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls" class="hidden">
+                
+                <button id="btnBrowse" type="button" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-lg shadow-sm transition flex items-center">
+                    <i class="fa-solid fa-file-excel text-emerald-400 me-1.5"></i>
+                    <span>엑셀 업로드</span>
+                </button>
+
+                <div class="flex items-center bg-slate-800 border border-slate-700 px-2 py-1 rounded-lg">
+                    <span class="text-[11px] text-slate-300 font-medium me-1.5">총원:</span>
+                    <input type="number" id="totalCapacityInput" value="300" min="1" class="w-14 px-1 py-0.5 text-xs bg-slate-900 text-blue-400 font-bold text-center border border-slate-700 rounded focus:outline-none focus:border-blue-500">
+                    <span class="text-[11px] text-slate-400 ml-1">명</span>
+                </div>
+
+                <button id="btnLoadSample" type="button" class="px-2.5 py-1.5 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-800/60 text-xs font-semibold rounded-lg transition" title="샘플 복원">
+                    <i class="fa-solid fa-rotate-left me-1"></i>샘플
+                </button>
+
+                <button id="btnDownloadSampleExcel" type="button" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold rounded-lg transition" title="양식 다운로드">
+                    <i class="fa-solid fa-download me-1"></i>양식
+                </button>
+
+                <button id="btnExportPng" type="button" class="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg shadow-md hover:shadow-lg transition flex items-center">
+                    <i class="fa-solid fa-image me-1.5"></i>
+                    <span>PNG 다운로드</span>
+                </button>
+            </div>
+        </div>
+        <p id="uploadedFileName" class="text-right text-[11px] text-emerald-400 font-semibold mt-1 px-2 hidden"></p>
+    </header>
+
+    <main class="w-full flex-1 flex items-center justify-center overflow-x-auto pb-2">
+        <div class="infographic-wrapper flex justify-center items-center">
+            
+            <!-- Infographic Card Component (Optimized 1240px Layout scaled to fit screen) -->
+            <div id="infographicCard" class="infographic-card rounded-2xl p-5 border border-slate-200 text-slate-800 bg-white">
+                
+                <!-- Card Top Header -->
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center text-lg font-black shadow">
+                            A
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h2 class="text-2xl font-black tracking-tight text-slate-900">재학생 현황</h2>
+                                <span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-bold uppercase">인포그래픽 리포트</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 font-medium">A-School Enrolled Student Demographics & Disability Breakdown</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Stats Counter Banner -->
+                    <div class="flex items-center space-x-5 bg-slate-50 border border-slate-200 rounded-xl px-4 py-1.5">
+                        <div class="text-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">현재원 / 총원</span>
+                            <div class="flex items-baseline space-x-1 justify-center">
+                                <span id="hdrCurrentCount" class="text-2xl font-black text-blue-600">119</span>
+                                <span class="text-sm font-bold text-slate-400">/</span>
+                                <span id="hdrTotalCapacity" class="text-sm font-bold text-slate-500">300</span>
+                            </div>
+                        </div>
+                        <div class="h-6 w-px bg-slate-300"></div>
+                        <div class="text-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block">기준 일자</span>
+                            <span id="hdrCurrentDate" class="text-xs font-black text-slate-700">2026. 07. 28</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 1: Donut Charts Row (성별, 지역, 중앙 배지, 연령, 중증여부) -->
+                <div class="grid grid-cols-5 gap-3 mb-3 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200">
+
+                    <!-- 1. 성별 Donut -->
+                    <div class="flex flex-col items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm h-full justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                            <h3 class="text-xs font-extrabold text-slate-800">성별</h3>
+                        </div>
+                        <div class="donut-wrapper my-1 flex items-center justify-center">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                        <div id="genderLegend" class="w-full space-y-0.5 text-[10px]"></div>
+                    </div>
+
+                    <!-- 2. 지역 Donut -->
+                    <div class="flex flex-col items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm h-full justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                            <h3 class="text-xs font-extrabold text-slate-800">지역</h3>
+                        </div>
+                        <div class="donut-wrapper my-1 flex items-center justify-center">
+                            <canvas id="regionChart"></canvas>
+                        </div>
+                        <div id="regionLegend" class="w-full space-y-0.5 text-[10px]"></div>
+                    </div>
+
+                    <!-- 3. Center Target Badge -->
+                    <div class="flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-3 rounded-xl shadow-md border border-slate-800 h-full">
+                        <span class="text-[10px] font-semibold text-blue-300 uppercase">재학 비율</span>
+                        <div class="relative flex items-center justify-center my-1">
+                            <div id="badgePercentage" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-200 to-white">
+                                39.7%
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden my-1">
+                            <div id="badgeProgressBar" class="bg-gradient-to-r from-blue-400 to-cyan-400 h-full rounded-full transition-all duration-500" style="width: 39.7%;"></div>
+                        </div>
+                        <div class="text-center text-[11px] text-slate-300 font-medium mt-0.5">
+                            <span id="centerCurrentText">119명</span> / <span id="centerTotalText">300명</span>
+                        </div>
+                        <div class="mt-2 pt-1 border-t border-slate-800 text-[9px] text-slate-400 text-center">
+                            <i class="fa-regular fa-clock me-1"></i><span id="centerDateText">2026.07.28</span> 기준
+                        </div>
+                    </div>
+
+                    <!-- 4. 연령 Donut -->
+                    <div class="flex flex-col items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm h-full justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                            <h3 class="text-xs font-extrabold text-slate-800">연령</h3>
+                        </div>
+                        <div class="donut-wrapper my-1 flex items-center justify-center">
+                            <canvas id="ageChart"></canvas>
+                        </div>
+                        <div id="ageLegend" class="w-full space-y-0.5 text-[10px]"></div>
+                    </div>
+
+                    <!-- 5. 중증여부 Donut -->
+                    <div class="flex flex-col items-center bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm h-full justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                            <h3 class="text-xs font-extrabold text-slate-800">중증여부</h3>
+                        </div>
+                        <div class="donut-wrapper my-1 flex items-center justify-center">
+                            <canvas id="severityChart"></canvas>
+                        </div>
+                        <div id="severityLegend" class="w-full space-y-0.5 text-[10px]"></div>
+                    </div>
+
+                </div>
+
+                <!-- SECTION 2: 장애유형 (Disability Type) Bar Chart -->
+                <div class="bg-white rounded-xl p-3 px-4 border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>
+                            <h3 class="text-xs font-extrabold text-slate-900">장애유형 (16개 항목)</h3>
+                        </div>
+                        <div class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                            (단위: 명, %)
+                        </div>
+                    </div>
+
+                    <!-- Bar Chart Canvas Box (Fit Height) -->
+                    <div class="w-full h-[220px] relative">
+                        <canvas id="disabilityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Card Footer Info -->
+                <div class="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                    <span>A-School Student Demographics Infographic Dashboard</span>
+                    <span>Generated automatically via SheetJS & Chart.js</span>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Notification Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script>
+        // Register ChartJS DataLabels Plugin
+        Chart.register(ChartDataLabels);
+
+        // Global Chart Instances
+        let genderChartInstance = null;
+        let regionChartInstance = null;
+        let ageChartInstance = null;
+        let severityChartInstance = null;
+        let disabilityChartInstance = null;
+
+        // Color Palettes
+        const COLOR_PALETTES = {
+            gender: ['#0284c7', '#f43f5e'],
+            region: ['#2563eb', '#38bdf8', '#4f46e5', '#8b5cf6', '#64748b'],
+            age: ['#0284c7', '#2563eb', '#4f46e5', '#7c3aed', '#9333ea', '#c026d3'],
+            severity: ['#0d9488', '#38bdf8']
+        };
+
+        const DISABILITY_CATEGORIES = [
+            '지체장애', '뇌병변장애', '시각장애', '청각장애', 
+            '언어장애', '안면장애', '신장장애', '심장장애', 
+            '간장애', '호흡기장애', '장요루장애', '뇌전증장애', 
+            '지적장애', '자폐성장애', '정신장애', '국가유공자'
+        ];
+
+        function getSampleData() {
+            const sampleRows = [];
+            let seq = 1;
+            const currentYear = new Date().getFullYear();
+
+            const createStudent = (gender, region, birthYear, severity, disType) => {
+                return {
+                    "순번": seq++,
+                    "성별": gender,
+                    "기본주소": region,
+                    "생년월일": `${birthYear}-05-15`,
+                    "중증여부": severity,
+                    "장애유형": disType
+                };
+            };
+
+            const disDistribution = [
+                { type: '지체장애', count: 22 },
+                { type: '뇌병변장애', count: 14 },
+                { type: '시각장애', count: 14 },
+                { type: '청각장애', count: 19 },
+                { type: '언어장애', count: 0 },
+                { type: '안면장애', count: 0 },
+                { type: '신장장애', count: 7 },
+                { type: '심장장애', count: 2 },
+                { type: '간장애', count: 0 },
+                { type: '호흡기장애', count: 0 },
+                { type: '장요루장애', count: 1 },
+                { type: '뇌전증장애', count: 3 },
+                { type: '지적장애', count: 12 },
+                { type: '자폐성장애', count: 9 },
+                { type: '정신장애', count: 14 },
+                { type: '국가유공자', count: 2 }
+            ];
+
+            const ageYears = [];
+            for(let i=0; i<8; i++) ageYears.push(currentYear - 18);
+            for(let i=0; i<41; i++) ageYears.push(currentYear - 24);
+            for(let i=0; i<28; i++) ageYears.push(currentYear - 34);
+            for(let i=0; i<17; i++) ageYears.push(currentYear - 44);
+            for(let i=0; i<24; i++) ageYears.push(currentYear - 54);
+            for(let i=0; i<1; i++) ageYears.push(currentYear - 65);
+
+            const regions = [];
+            for(let i=0; i<19; i++) regions.push("경기도 화성시 동탄대로 100");
+            for(let i=0; i<65; i++) regions.push("경기도 수원이목동 20");
+            for(let i=0; i<17; i++) regions.push("서울특별시 강남구 테헤란로 12");
+            for(let i=0; i<7; i++) regions.push("대전광역시 서구 둔산로 5");
+            for(let i=0; i<11; i++) regions.push("강원도 춘천시 중앙로 1");
+
+            let ageIdx = 0, regIdx = 0;
+            let maleLeft = 89, severeLeft = 57;
+
+            disDistribution.forEach(item => {
+                for(let c=0; c<item.count; c++) {
+                    const gender = (maleLeft-- > 0) ? "남성" : "여성";
+                    const severity = (severeLeft-- > 0) ? "중증" : "경증";
+                    const reg = regions[regIdx % regions.length];
+                    const yr = ageYears[ageIdx % ageYears.length];
+                    regIdx++;
+                    ageIdx++;
+                    sampleRows.push(createStudent(gender, reg, yr, severity, item.type));
+                }
+            });
+
+            return sampleRows;
+        }
+
+        function processStudentData(rows) {
+            const totalCount = rows.length;
+            const currentYear = new Date().getFullYear();
+
+            let maleCount = 0, femaleCount = 0;
+            let regHwaseong = 0, regGyeonggiEtc = 0, regSeoulIncheon = 0, regDaejeonChungcheong = 0, regOthers = 0;
+            let age10s = 0, age20s = 0, age30s = 0, age40s = 0, age50s = 0, age60sPlus = 0;
+            let severeCount = 0, mildCount = 0;
+
+            const disMap = {};
+            DISABILITY_CATEGORIES.forEach(cat => disMap[cat] = 0);
+
+            rows.forEach(row => {
+                const gender = String(row['성별'] || '').trim();
+                if (gender.includes('남')) maleCount++;
+                else if (gender.includes('여')) femaleCount++;
+
+                const addr = String(row['기본주소'] || '').trim();
+                if (addr.includes('화성시') || addr.includes('화성')) regHwaseong++;
+                else if (addr.includes('경기도') || addr.includes('경기')) regGyeonggiEtc++;
+                else if (addr.includes('서울') || addr.includes('인천')) regSeoulIncheon++;
+                else if (addr.includes('대전') || addr.includes('충청') || addr.includes('충북') || addr.includes('충남')) regDaejeonChungcheong++;
+                else regOthers++;
+
+                const rawBirth = String(row['생년월일'] || '');
+                let birthYear = null;
+                const yearMatch = rawBirth.match(/(19\d\d|20\d\d)/);
+                if (yearMatch) {
+                    birthYear = parseInt(yearMatch[0], 10);
+                } else {
+                    const numVal = parseFloat(rawBirth);
+                    if (!isNaN(numVal) && numVal > 10000 && numVal < 60000) {
+                        const dateObj = XLSX.SSF.parse_date_code(numVal);
+                        if (dateObj) birthYear = dateObj.y;
+                    }
+                }
+
+                if (birthYear) {
+                    const age = currentYear - birthYear;
+                    if (age < 20) age10s++;
+                    else if (age < 30) age20s++;
+                    else if (age < 40) age30s++;
+                    else if (age < 50) age40s++;
+                    else if (age < 60) age50s++;
+                    else age60sPlus++;
+                } else {
+                    age20s++;
+                }
+
+                const sev = String(row['중증여부'] || '').trim();
+                if (sev.includes('중증')) severeCount++;
+                else mildCount++;
+
+                const dis = String(row['장애유형'] || '').trim();
+                let matched = false;
+                for (let cat of DISABILITY_CATEGORIES) {
+                    if (dis.includes(cat) || cat.includes(dis)) {
+                        disMap[cat]++;
+                        matched = true;
+                        break;
+                    }
+                }
+                if (!matched && dis) {
+                    if (dis.includes('지체')) disMap['지체장애']++;
+                    else if (dis.includes('뇌병변')) disMap['뇌병변장애']++;
+                    else if (dis.includes('시각')) disMap['시각장애']++;
+                    else if (dis.includes('청각')) disMap['청각장애']++;
+                    else if (dis.includes('지적')) disMap['지적장애']++;
+                    else if (dis.includes('자폐')) disMap['자폐성장애']++;
+                    else if (dis.includes('정신')) disMap['정신장애']++;
+                    else disMap['지체장애']++;
+                }
+            });
+
+            const calcPct = (cnt) => totalCount > 0 ? (Math.round((cnt / totalCount) * 1000) / 10).toFixed(1) : "0.0";
+
+            return {
+                totalCount,
+                gender: {
+                    labels: ['남성', '여성'],
+                    counts: [maleCount, femaleCount],
+                    pcts: [calcPct(maleCount), calcPct(femaleCount)]
+                },
+                region: {
+                    labels: ['경기도 화성시', '화성 외 경기도', '서울 및 인천', '대전 및 충청', '기타'],
+                    counts: [regHwaseong, regGyeonggiEtc, regSeoulIncheon, regDaejeonChungcheong, regOthers],
+                    pcts: [calcPct(regHwaseong), calcPct(regGyeonggiEtc), calcPct(regSeoulIncheon), calcPct(regDaejeonChungcheong), calcPct(regOthers)]
+                },
+                age: {
+                    labels: ['10대', '20대', '30대', '40대', '50대', '60대 이상'],
+                    counts: [age10s, age20s, age30s, age40s, age50s, age60sPlus],
+                    pcts: [calcPct(age10s), calcPct(age20s), calcPct(age30s), calcPct(age40s), calcPct(age50s), calcPct(age60sPlus)]
+                },
+                severity: {
+                    labels: ['중증', '경증'],
+                    counts: [severeCount, mildCount],
+                    pcts: [calcPct(severeCount), calcPct(mildCount)]
+                },
+                disability: {
+                    labels: DISABILITY_CATEGORIES,
+                    counts: DISABILITY_CATEGORIES.map(cat => disMap[cat]),
+                    pcts: DISABILITY_CATEGORIES.map(cat => calcPct(disMap[cat]))
+                }
+            };
+        }
+
+        function createDonutChart(canvasId, legendId, dataObj, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            const legendEl = document.getElementById(legendId);
+            let legendHtml = '';
+            dataObj.labels.forEach((label, idx) => {
+                const count = dataObj.counts[idx];
+                const pct = dataObj.pcts[idx];
+                const color = colors[idx % colors.length];
+                legendHtml += `
+                    <div class="flex items-center justify-between text-[10px] py-0.5 border-b border-slate-100 last:border-none">
+                        <div class="flex items-center space-x-1 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: ${color}"></span>
+                            <span class="font-medium text-slate-700 truncate">${label}</span>
+                        </div>
+                        <div class="font-bold text-slate-900 flex-shrink-0 ms-1">
+                            ${count}명 <span class="text-blue-600 font-extrabold ml-0.5">(${pct}%)</span>
+                        </div>
+                    </div>
+                `;
+            });
+            legendEl.innerHTML = legendHtml;
+
+            return new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: dataObj.labels,
+                    datasets: [{
+                        data: dataObj.counts,
+                        backgroundColor: colors,
+                        borderWidth: 1.5,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '64%',
+                    animation: { duration: 0 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    return `${context.label}: ${dataObj.counts[index]}명 (${dataObj.pcts[index]}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 9, family: 'Pretendard' },
+                            formatter: (value, ctx) => {
+                                const pct = dataObj.pcts[ctx.dataIndex];
+                                return parseFloat(pct) > 8.0 ? `${pct}%` : '';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDisabilityBarChart(dataObj) {
+            const ctx = document.getElementById('disabilityChart').getContext('2d');
+            if (disabilityChartInstance) disabilityChartInstance.destroy();
+
+            const maxVal = Math.max(...dataObj.counts, 5);
+
+            disabilityChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dataObj.labels.map(l => l.replace('장애', '')),
+                    datasets: [{
+                        label: '인원수(명)',
+                        data: dataObj.counts,
+                        backgroundColor: function(context) {
+                            return context.dataIndex % 2 === 0 ? '#2563eb' : '#f43f5e';
+                        },
+                        borderRadius: 4,
+                        borderSkipped: false,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    layout: {
+                        padding: { top: 22, bottom: 0 }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Pretendard', size: 10, weight: '700' },
+                                color: '#334155'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: Math.ceil(maxVal * 1.25),
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                font: { family: 'Pretendard', size: 9 },
+                                color: '#64748b'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const idx = context.dataIndex;
+                                    return `${dataObj.labels[idx]}: ${dataObj.counts[idx]}명 (${dataObj.pcts[idx]}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 1,
+                            font: { family: 'Pretendard', size: 9, weight: 'bold' },
+                            color: function(context) {
+                                return context.dataIndex % 2 === 0 ? '#1e40af' : '#be123c';
+                            },
+                            formatter: (value, ctx) => {
+                                const idx = ctx.dataIndex;
+                                const pct = dataObj.pcts[idx];
+                                return `${value}명\n(${pct}%)`;
+                            },
+                            textAlign: 'center'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateInfographicDashboard(studentRows) {
+            const stats = processStudentData(studentRows);
+            const totalCapacity = parseInt(document.getElementById('totalCapacityInput').value, 10) || 300;
+
+            const today = new Date();
+            const dateStr = `${today.getFullYear()}. ${String(today.getMonth() + 1).padStart(2, '0')}. ${String(today.getDate()).padStart(2, '0')}`;
+
+            document.getElementById('hdrCurrentCount').textContent = stats.totalCount;
+            document.getElementById('hdrTotalCapacity').textContent = totalCapacity;
+            document.getElementById('hdrCurrentDate').textContent = dateStr;
+
+            const overallPct = totalCapacity > 0 ? ((stats.totalCount / totalCapacity) * 100).toFixed(1) : "0.0";
+            document.getElementById('badgePercentage').textContent = `${overallPct}%`;
+            document.getElementById('badgeProgressBar').style.width = `${Math.min(overallPct, 100)}%`;
+            document.getElementById('centerCurrentText').textContent = `${stats.totalCount}명`;
+            document.getElementById('centerTotalText').textContent = `${totalCapacity}명`;
+            document.getElementById('centerDateText').textContent = dateStr;
+
+            if (genderChartInstance) genderChartInstance.destroy();
+            if (regionChartInstance) regionChartInstance.destroy();
+            if (ageChartInstance) ageChartInstance.destroy();
+            if (severityChartInstance) severityChartInstance.destroy();
+
+            genderChartInstance = createDonutChart('genderChart', 'genderLegend', stats.gender, COLOR_PALETTES.gender);
+            regionChartInstance = createDonutChart('regionChart', 'regionLegend', stats.region, COLOR_PALETTES.region);
+            ageChartInstance = createDonutChart('ageChart', 'ageLegend', stats.age, COLOR_PALETTES.age);
+            severityChartInstance = createDonutChart('severityChart', 'severityLegend', stats.severity, COLOR_PALETTES.severity);
+
+            renderDisabilityBarChart(stats.disability);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-800 text-white' : type === 'error' ? 'bg-rose-800 text-white' : 'bg-slate-800 text-white';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+
+            toast.className = `toast-msg pointer-events-auto px-3 py-2 rounded-lg shadow-lg text-xs font-bold flex items-center space-x-2 border border-white/10 ${bgClass}`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function parseExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (!jsonData || jsonData.length === 0) {
+                        showToast('엑셀 파일에 데이터가 없습니다.', 'error');
+                        return;
+                    }
+
+                    const fileNameEl = document.getElementById('uploadedFileName');
+                    fileNameEl.textContent = `불러온 파일: ${file.name} (${jsonData.length}행)`;
+                    fileNameEl.classList.remove('hidden');
+
+                    updateInfographicDashboard(jsonData);
+                    showToast(`엑셀 파싱 성공! 총 ${jsonData.length}명 집계 완료.`, 'success');
+
+                } catch (err) {
+                    console.error(err);
+                    showToast('엑셀 파일 분석 중 오류가 발생했습니다.', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadInfographicPNG() {
+            const cardEl = document.getElementById('infographicCard');
+            showToast('고해상도 이미지 생성 중입니다...', 'info');
+
+            html2canvas(cardEl, {
+                scale: 2.5,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                const today = new Date();
+                const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+                
+                link.download = `A학교_재학생현황_인포그래픽_${dateStr}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                showToast('인포그래픽 PNG 이미지 다운로드 완료!', 'success');
+            }).catch(err => {
+                console.error('html2canvas error:', err);
+                showToast('이미지 생성 중 오류가 발생했습니다.', 'error');
+            });
+        }
+
+        function generateSampleExcelFile() {
+            const sampleData = getSampleData();
+            const ws = XLSX.utils.json_to_sheet(sampleData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "재학생현황");
+            XLSX.writeFile(wb, "A학교_재학생현황_샘플데이터.xlsx");
+            showToast('샘플 엑셀 서식이 다운로드되었습니다.', 'success');
+        }
+
+        // Auto-scaling card function to guarantee fitting inside viewport
+        function autoScaleDashboardCard() {
+            const card = document.getElementById('infographicCard');
+            if (!card) return;
+            const availableWidth = window.innerWidth - 32;
+            const cardWidth = 1240;
+
+            if (availableWidth < cardWidth) {
+                const scale = availableWidth / cardWidth;
+                card.style.transform = `scale(${scale})`;
+                card.style.marginBottom = `-${(1 - scale) * card.offsetHeight}px`;
+            } else {
+                card.style.transform = 'none';
+                card.style.marginBottom = '0px';
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const initialSample = getSampleData();
+            updateInfographicDashboard(initialSample);
+            autoScaleDashboardCard();
+
+            window.addEventListener('resize', autoScaleDashboardCard);
+
+            const fileInput = document.getElementById('excelFileInput');
+            const btnBrowse = document.getElementById('btnBrowse');
+
+            btnBrowse.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    parseExcelFile(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('totalCapacityInput').addEventListener('change', () => {
+                const sample = getSampleData();
+                updateInfographicDashboard(sample);
+            });
+
+            document.getElementById('btnLoadSample').addEventListener('click', () => {
+                document.getElementById('uploadedFileName').classList.add('hidden');
+                document.getElementById('excelFileInput').value = '';
+                updateInfographicDashboard(getSampleData());
+                showToast('샘플 데이터로 시각화를 재설정했습니다.', 'info');
+            });
+
+            document.getElementById('btnDownloadSampleExcel').addEventListener('click', generateSampleExcelFile);
+            document.getElementById('btnExportPng').addEventListener('click', downloadInfographicPNG);
+        });
+    </script>
+</body>
+</html>
