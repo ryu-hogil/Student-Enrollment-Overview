@@ -38,7 +38,7 @@
             overflow: hidden; 
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
             transform-origin: center center;
-            border-radius: 8px; /* Slight rounding for preview aesthetic, can be removed if strict 16:9 box is needed */
+            border-radius: 8px;
         }
 
         /* Main Frame & Title */
@@ -94,11 +94,11 @@
         }
 
         .top-date-right .year {
-            font-weight: 400; /* Thinner for the year */
+            font-weight: 400;
         }
 
         .top-date-right .month-day {
-            font-weight: 800; /* Bolder for month and day */
+            font-weight: 800;
         }
 
         /* Content Wrapper */
@@ -159,7 +159,7 @@
             font-size: 50px;
             color: #3a62ad;
             font-weight: 300;
-            padding-bottom: 24px; /* 라벨 공간만큼 위로 살짝 올려 숫자의 중앙에 맞춤 */
+            padding-bottom: 24px;
             margin: 0 -4px;
         }
 
@@ -175,7 +175,7 @@
         .top-row {
             display: flex;
             justify-content: center;
-            align-items: center; /* Ensures strict horizontal alignment */
+            align-items: center;
             flex: 1;
             padding: 0;
             gap: 20px;
@@ -186,10 +186,10 @@
         /* The Date Badge inserted between charts */
         .date-badge {
             width: 105px;
-            height: 195px; /* 250px에서 대폭 축소하여 하단 침범 방지 */
+            height: 195px;
             background: white;
-            border: 3px solid #3a62ad; /* Outer blue border */
-            border-radius: 60px; /* Pill shape */
+            border: 3px solid #3a62ad;
+            border-radius: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -197,7 +197,7 @@
             position: relative;
             z-index: 20;
             margin: 0 10px;
-            box-shadow: inset 0 0 0 1.5px #e5e7eb; /* Inner grey line simulation */
+            box-shadow: inset 0 0 0 1.5px #e5e7eb;
             padding-top: 2px;
         }
 
@@ -210,7 +210,7 @@
             width: 12px;
             height: 12px;
             background-color: white;
-            border: 2.5px solid #f29b8f; /* Coral border */
+            border: 2.5px solid #f29b8f;
             border-radius: 50%;
             z-index: 2;
         }
@@ -222,24 +222,24 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1px; /* 간격 축소 */
+            gap: 1px;
         }
 
         .date-badge .val { 
-            font-size: 48px; /* 상자 높이에 맞춰 폰트 미세 조정 */
+            font-size: 48px;
             color: #3a62ad; 
-            line-height: 0.85; /* 줄간격 더 타이트하게 */
+            line-height: 0.85;
             letter-spacing: -1.5px;
         }
         
         #val-year {
-            font-weight: 200; /* 얇은 연도 */
+            font-weight: 200;
             font-size: 42px;
             margin-bottom: 6px; 
         }
         
         #val-month, #val-day {
-            font-weight: 800; /* 두꺼운 월/일 */
+            font-weight: 800;
         }
         
         .date-badge .label { 
@@ -254,9 +254,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 250px; /* 넓이 확장 */
+            width: 250px;
             position: relative;
         }
+
+        /* Width Modifiers for Titles & Lines */
+        .w-short { width: 84px !important; }
+        .w-long { width: 124px !important; }
 
         .chart-title, .bar-chart-title {
             box-sizing: border-box;
@@ -264,10 +268,12 @@
             height: 42px;
             background: linear-gradient(white, white) padding-box,
                         linear-gradient(to bottom, #3a62ad 50%, #d1d5db 50%) border-box;
-            border: 2.5px solid transparent;
+            border-style: solid;
+            border-color: transparent;
+            border-width: 4.5px 2.5px 2px 2.5px;
             border-radius: 30px;
             font-size: 21px;
-            font-weight: 500; /* 기존 300에서 500으로 2단계 두껍게 수정 */
+            font-weight: 500;
             color: #3a62ad;
             position: relative;
             z-index: 20;
@@ -285,7 +291,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            border: 2.5px solid #f29b8f; /* Coral */
+            border: 2.5px solid #f29b8f;
             background-color: white;
             top: 50%;
             transform: translateY(-50%);
@@ -305,16 +311,17 @@
             left: 50%;
             transform: translateX(-50%);
             width: 120px;
-            height: 25px;
-            border-left: 2px dotted #a890c2; /* 보라색 점선 */
+            height: 45px;
+            border-left: 2px dotted #a890c2;
             border-right: 2px dotted #a890c2;
-            z-index: 10;
+            z-index: 5;
         }
 
         .donut-container {
             position: relative;
-            width: 250px; /* 차트 캔버스 크기 확장 */
+            width: 250px;
             height: 250px;
+            z-index: 10;
         }
 
         /* Bottom Row (Bar Chart) */
@@ -335,29 +342,32 @@
 
         .bar-chart-drop-lines {
             position: absolute;
-            top: -4px; /* 21 - 25 = -4 (제목 중앙에서부터 선이 내려오도록) */
+            top: -4px;
             left: 50%;
             transform: translateX(-50%);
             width: 120px;
             height: 35px;
             border-left: 2px dotted #a890c2;
             border-right: 2px dotted #a890c2;
-            z-index: 10;
+            z-index: 5;
         }
         
         .bar-chart-container {
             width: 100%;
             height: 100%;
             padding-top: 25px;
+            position: relative;
+            z-index: 10;
         }
         
         .unit-label {
             position: absolute;
-            top: 10px;
-            right: 0;
+            top: 35px;
+            right: 20px;
             color: #9ca3af;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
+            z-index: 20;
         }
 
         .chartjs-datalabels {
@@ -380,7 +390,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* No scrollbars */
+            overflow: hidden;
             padding: 10px;
             box-sizing: border-box;
         }
@@ -396,7 +406,6 @@
             <span class="w-2 h-2 rounded-full bg-[#3a62ad]"></span>
         </h1>
         
-        <!-- Controls (버튼 크기 통일 및 공간 축소) -->
         <div class="flex flex-row gap-4 items-center justify-center mb-1 w-full">
             <!-- 엑셀 파일 업로드 버튼 -->
             <div 
@@ -411,14 +420,13 @@
             <!-- 이미지 다운로드 버튼 -->
             <button id="download-btn" class="bg-[#3a62ad] hover:bg-[#2c4a85] text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 opacity-50 cursor-not-allowed h-[46px] w-[260px] whitespace-nowrap" disabled>
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="text-[15px]">이미지 다운로드</span>
+                <span class="text-[15px]">고화질 이미지 다운로드</span>
             </button>
         </div>
 
         <div id="status-message" class="text-center text-sm font-bold h-5 mb-1 text-[#3a62ad] transition-opacity"></div>
     </div>
 
-    <!-- Scaling Wrapper for Viewport -->
     <div class="scale-wrapper">
         <!-- Infographic Canvas (Fixed Size 1280x720) -->
         <div id="infographic-container">
@@ -461,8 +469,8 @@
                     <div class="top-row">
                         <!-- Gender Chart -->
                         <div class="chart-section">
-                            <div class="chart-title">성별</div>
-                            <div class="chart-drop-lines"></div>
+                            <div class="chart-title w-short">성별</div>
+                            <div class="chart-drop-lines w-short"></div>
                             <div class="donut-container">
                                 <canvas id="genderChart"></canvas>
                             </div>
@@ -470,8 +478,8 @@
 
                         <!-- Region Chart -->
                         <div class="chart-section">
-                            <div class="chart-title">지역</div>
-                            <div class="chart-drop-lines"></div>
+                            <div class="chart-title w-short">지역</div>
+                            <div class="chart-drop-lines w-short"></div>
                             <div class="donut-container">
                                 <canvas id="regionChart"></canvas>
                             </div>
@@ -489,8 +497,8 @@
 
                         <!-- Age Chart -->
                         <div class="chart-section">
-                            <div class="chart-title">연령</div>
-                            <div class="chart-drop-lines"></div>
+                            <div class="chart-title w-short">연령</div>
+                            <div class="chart-drop-lines w-short"></div>
                             <div class="donut-container">
                                 <canvas id="ageChart"></canvas>
                             </div>
@@ -498,8 +506,8 @@
 
                         <!-- Severity Chart -->
                         <div class="chart-section">
-                            <div class="chart-title">중증여부</div>
-                            <div class="chart-drop-lines"></div>
+                            <div class="chart-title w-long">중증여부</div>
+                            <div class="chart-drop-lines w-long"></div>
                             <div class="donut-container">
                                 <canvas id="severityChart"></canvas>
                             </div>
@@ -508,8 +516,8 @@
 
                     <!-- Bottom Row (Bar Chart) -->
                     <div class="bottom-row">
-                        <div class="bar-chart-drop-lines"></div>
-                        <div class="bar-chart-title">장애유형</div>
+                        <div class="bar-chart-drop-lines w-long"></div>
+                        <div class="bar-chart-title w-long">장애유형</div>
                         <div class="unit-label">(단위 : 명)</div>
                         <div class="bar-chart-container">
                             <canvas id="disabilityChart"></canvas>
@@ -522,13 +530,13 @@
     </div>
 
     <script>
-        // Color Palette based on requirements and sample
+        // Color Palette
         const colors = {
             blueDark: '#3a62ad',
             blueLight: '#52c3f1',
             blueMid: '#1c96d5',
             redLight: '#f29b8f',
-            teal: '#62c1b4', // Daejeon/Chungcheong color requested explicitly
+            teal: '#62c1b4',
             purple: '#a890c2',
             gray: '#d1d5db',
         };
@@ -555,6 +563,47 @@
         // Global Chart.js defaults
         Chart.defaults.font.family = "'Pretendard', sans-serif";
         Chart.defaults.color = '#333';
+        
+        // ★ 차트 내부 렌더링 해상도를 3배로 상향하여 선명도 대폭 개선
+        Chart.defaults.devicePixelRatio = 3;
+
+        // ★ 파일명에서 날짜 추출하는 함수 추가
+        function extractDateFromFilename(filename) {
+            const today = new Date();
+            let year = today.getFullYear();
+            let month = today.getMonth();
+            let day = today.getDate();
+            let found = false;
+
+            // 1. 26년 7월 29일 형태
+            const regex1 = /(\d{2,4})년\s*(\d{1,2})월\s*(\d{1,2})일/;
+            // 2. 26.07.29. 형태
+            const regex2 = /(\d{2,4})\.(\d{1,2})\.(\d{1,2})/;
+            // 3. 260729 (6자리 연속된 숫자) 형태
+            const regex3 = /(?:^|[^\d])(\d{2})(\d{2})(\d{2})(?=[^\d]|$)/;
+
+            let m = filename.match(regex1) || filename.match(regex2);
+            if (m) {
+                let y = parseInt(m[1], 10);
+                year = y < 100 ? y + 2000 : y;
+                month = parseInt(m[2], 10) - 1;
+                day = parseInt(m[3], 10);
+                found = true;
+            } else {
+                m = filename.match(regex3);
+                if (m) {
+                    year = parseInt(m[1], 10) + 2000;
+                    month = parseInt(m[2], 10) - 1;
+                    day = parseInt(m[3], 10);
+                    found = true;
+                }
+            }
+
+            if (found && month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+                return new Date(year, month, day);
+            }
+            return today; // 패턴을 못 찾으면 현재 날짜 반환
+        }
 
         function renderDonutChart(canvasId, data, labels, bgColors) {
             const ctx = document.getElementById(canvasId).getContext('2d');
@@ -593,7 +642,6 @@
                 plugins: [{
                     id: 'customLabels',
                     afterUpdate(chart) {
-                        // 지역 차트용 원래 최대 반지름 기억
                         if (chart.canvas.id === 'regionChart') {
                             const meta = chart.getDatasetMeta(0);
                             meta.data.forEach(arc => {
@@ -602,7 +650,6 @@
                         }
                     },
                     beforeDatasetDraw(chart) {
-                        // ★ 지역 차트 커스텀: 3시 방향부터 매끄럽게 줄어드는 스파이럴(나선형) 조각 그리기
                         if (chart.canvas.id === 'regionChart') {
                             const ctx = chart.ctx;
                             const meta = chart.getDatasetMeta(0);
@@ -611,20 +658,28 @@
                             const centerX = meta.data[0].x;
                             const centerY = meta.data[0].y;
                             const maxR = meta.data[0]._baseOuterRadius;
-                            const minR = maxR * 0.65; // 나선형 끝 지점의 최소 반지름
+                            const minR = maxR * 0.65;
                             const innerR = meta.data[0].innerRadius;
 
-                            // 1. 가이드 점선 원 그리기
                             ctx.save();
+                            
                             ctx.beginPath();
                             ctx.arc(centerX, centerY, maxR, 0, 2 * Math.PI);
-                            ctx.strokeStyle = '#cbd5e1';
+                            ctx.fillStyle = '#F6F7F7';
+                            ctx.fill();
+
+                            ctx.strokeStyle = '#cbd5e1'; 
                             ctx.lineWidth = 1.5;
                             ctx.setLineDash([4, 4]);
                             ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, innerR, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            
                             ctx.restore();
 
-                            // 2. 스파이럴 호(Arc) 직접 계산하여 그리기
                             const bgColors = chart.data.datasets[0].backgroundColor;
                             
                             meta.data.forEach((arc, i) => {
@@ -677,9 +732,8 @@
                         const meta = chart.getDatasetMeta(0);
                         
                         let drawnBoxes = []; 
-                        let nextAllowedLeftY = 9999; // 지역차트 좌측 라벨 겹침 방지용 (아래에서 위로 쌓임)
+                        let nextAllowedLeftY = 9999; 
 
-                        // ★ 1위(가장 큰 비중), 2위(두 번째로 큰 비중) 값 찾기
                         const validData = dataset.data.filter(v => v > 0);
                         const sortedUniqueData = [...new Set(validData)].sort((a, b) => b - a);
                         const maxDataValue = sortedUniqueData.length > 0 ? sortedUniqueData[0] : -1;
@@ -694,7 +748,6 @@
                             const arc = meta.data[i];
                             const angle = (arc.startAngle + arc.endAngle) / 2;
                             
-                            // 퍼센트(파이 크기)에 따른 기본 폰트 크기 설정
                             let percentFontSize = 24;
                             let labelFontSize = 12;
 
@@ -712,21 +765,19 @@
                                 labelFontSize = 13;
                             }
 
-                            // ★ 1위는 약 1.8배(최대 44px), 2위는 1.2배(최대 30px) 확대 적용 (캔버스 이탈 방지 상한선)
                             if (value === maxDataValue) {
                                 percentFontSize = Math.min(Math.round(percentFontSize * 1.8), 44);
                             } else if (value === secondMaxDataValue) {
                                 percentFontSize = Math.min(Math.round(percentFontSize * 1.2), 30);
                             }
 
-                            // 기본 반지름 위치 조정 (3% 중심쪽으로 이동)
                             let startR = arc.outerRadius * 0.42; 
                             if (percentageNum < 10) startR = arc.outerRadius * 0.52; 
                             if (percentageNum < 5) startR = arc.outerRadius * 0.62;
                             
                             if (chart.canvas.id === 'regionChart') {
                                 const maxR = meta.data[0]._baseOuterRadius || arc.outerRadius;
-                                startR = maxR * 0.57; // 0.60에서 0.57로 당김
+                                startR = maxR * 0.57; 
                             }
                             
                             let R = startR;
@@ -743,16 +794,14 @@
                             let textAlign = 'center';
 
                             if (chart.canvas.id === 'regionChart' && i >= 2) { 
-                                // ★ 지역 차트 커스텀 레이아웃 (좌측 항목들을 겹침 없이 좌측 정렬로 수직 적재)
                                 const maxR = meta.data[0]._baseOuterRadius || arc.outerRadius;
                                 textAlign = 'left'; 
-                                x = centerX - maxR * 0.77; // 0.80에서 중심쪽으로 3% 당김
+                                x = centerX - maxR * 0.77; 
                                 let idealY = centerY + Math.sin(angle) * maxR * 0.7; 
                                 y = Math.min(idealY, nextAllowedLeftY - (percentFontSize * 0.2)); 
                                 const boxHeight = percentFontSize + labelFontSize + 10; 
-                                nextAllowedLeftY = y - boxHeight; // 다음 항목을 위해 Y축 허용선 갱신
+                                nextAllowedLeftY = y - boxHeight; 
                             } else {
-                                // 일반적인 방사형 배치 및 충돌 감지 밀어내기
                                 let isOverlapping = true;
                                 let attempts = 0;
                                 const maxAttempts = 30;
@@ -761,13 +810,8 @@
                                     x = centerX + Math.cos(angle) * R;
                                     y = centerY + Math.sin(angle) * R;
                                     
-                                    // ★ 특정 라벨 위치 수동 튜닝 (사용자 요청)
-                                    if (chart.canvas.id === 'severityChart' && label.includes('경증')) {
-                                        x += 175; // 중심쪽으로 당김 + 우측 50px 추가 이동
-                                    }
                                     if (chart.canvas.id === 'ageChart') {
                                         const maxR = arc.outerRadius;
-                                        // 도넛 중심(centerX, centerY)에 더 가깝게 배수를 3%씩 줄여서 안쪽으로 모아줌
                                         if (label.includes('10대')) {
                                             x = centerX + maxR * 0.22;
                                             y = centerY - maxR * 0.62;
@@ -778,7 +822,7 @@
                                             x = centerX;
                                             y = centerY + maxR * 0.65;
                                         } else if (label.includes('40대')) {
-                                            x = (centerX - maxR * 0.55) - 10; // 왼쪽으로 10px 추가 이동
+                                            x = (centerX - maxR * 0.55) - 10;
                                             y = centerY + maxR * 0.30;
                                         } else if (label.includes('50대')) {
                                             x = centerX - maxR * 0.65;
@@ -789,7 +833,6 @@
                                         }
                                     }
 
-                                    // 폰트 크기에 맞춰 히트박스(충돌 영역) 동적 조절
                                     const hitbox = {
                                         left: x - boxWidth / 2,
                                         right: x + boxWidth / 2,
@@ -811,6 +854,14 @@
                                         drawnBoxes.push(hitbox); 
                                     }
                                 }
+
+                                if (chart.canvas.id === 'severityChart') {
+                                    if (label.includes('경증')) {
+                                        x += 70; 
+                                    } else if (label.includes('중증')) {
+                                        y -= 35; 
+                                    }
+                                }
                             }
 
                             ctx.textAlign = textAlign;
@@ -819,7 +870,6 @@
                             const labelY = y - (percentFontSize * 0.4) - 2;
                             const percentY = y + (labelFontSize * 0.5) + 2;
                             
-                            // 항목 이름 및 인원수
                             ctx.font = `bold ${labelFontSize}px Pretendard`;
                             ctx.lineWidth = 4;
                             ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
@@ -828,7 +878,6 @@
                             ctx.fillStyle = '#000';
                             ctx.fillText(`${label}: ${value}명`, x, labelY);
                             
-                            // 퍼센트 숫자 (그림자 효과)
                             ctx.font = `900 ${percentFontSize}px Pretendard`;
                             let pColor = bgColors[i];
                             
@@ -862,9 +911,8 @@
             }
 
             const total = data.reduce((a, b) => a + b, 0);
-            const maxVal = Math.max(...data);
+            const maxVal = Math.max(...data) || 10;
             
-            // Alternating colors for bars
             const bgColors = labels.map((_, i) => i % 2 === 0 ? colors.blueDark : colors.redLight);
 
             const config = {
@@ -884,7 +932,6 @@
                     animation: {
                         duration: 800,
                         onComplete: () => {
-                            // Enable image download only after animation completes
                             const btn = document.getElementById('download-btn');
                             btn.disabled = false;
                             btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -892,8 +939,23 @@
                     },
                     scales: {
                         x: {
-                            grid: { display: false },
-                            border: { display: false },
+                            grid: { 
+                                display: true, 
+                                color: (ctx) => {
+                                    if (!ctx.scale || !ctx.scale.ticks) return '#cbd5e1';
+                                    if (ctx.index === 0 || ctx.index === ctx.scale.ticks.length) {
+                                        return 'transparent';
+                                    }
+                                    return '#cbd5e1';
+                                },
+                                borderDash: [3, 3],
+                                drawTicks: false
+                            },
+                            border: { 
+                                display: true, 
+                                color: '#000000', 
+                                width: 1.5 
+                            },
                             ticks: {
                                 font: { family: "'Pretendard', sans-serif", size: 15, weight: 'bold' },
                                 color: '#333',
@@ -903,8 +965,25 @@
                             }
                         },
                         y: {
-                            display: false, // Hide Y axis entirely
-                            max: maxVal * 1.4 // Ensure enough top padding for percentage labels
+                            display: true, 
+                            grid: {
+                                display: true,
+                                color: (ctx) => {
+                                    if (!ctx.scale || !ctx.scale.ticks) return '#cbd5e1';
+                                    if (ctx.index === 0 || ctx.index === ctx.scale.ticks.length - 1) {
+                                        return 'transparent';
+                                    }
+                                    return '#cbd5e1';
+                                },
+                                borderDash: [3, 3],
+                                drawTicks: false
+                            },
+                            border: { display: false }, 
+                            ticks: { 
+                                display: false, 
+                                maxTicksLimit: 5 
+                            },
+                            max: maxVal * 1.5 
                         }
                     },
                     plugins: {
@@ -921,11 +1000,20 @@
                                 weight: 'bold',
                                 size: 18
                             },
-                            formatter: (value) => value // Display count value
+                            formatter: (value) => value 
                         }
                     }
                 },
                 plugins: [{
+                    id: 'chartAreaBackground',
+                    beforeDraw(chart) {
+                        const { ctx, chartArea: { left, right, bottom } } = chart;
+                        ctx.save();
+                        ctx.fillStyle = '#F6F7F7'; 
+                        ctx.fillRect(left, 0, right - left, bottom);
+                        ctx.restore();
+                    }
+                }, {
                     id: 'barTopLabels',
                     afterDatasetsDraw(chart) {
                         const { ctx } = chart;
@@ -936,32 +1024,29 @@
                             const val = chart.data.datasets[0].data[index];
                             const percentage = total > 0 ? (val / total * 100).toFixed(1) : 0;
                             
-                            // 기본 퍼센트 위치 (막대 꼭대기보다 12px 위)
                             let labelY = bar.y - 12; 
                             
-                            // 겹침 방지 로직: 
-                            // 막대가 너무 짧거나 0이어서 하단의 명수(인원수) 텍스트와 겹칠 위험이 있는 경우,
-                            // 퍼센트 텍스트를 X축(bar.base)으로부터 강제로 위로 끌어올림. 
                             const minClearanceY = bar.base - 45; 
                             if (labelY > minClearanceY) {
                                 labelY = minClearanceY; 
                             }
                             
-                            // Draw percentage label angled (-45deg)
-                            ctx.translate(bar.x, labelY);
+                            const targetX = bar.x - 15;
+                            const targetY = labelY + 10;
+
+                            ctx.translate(targetX, targetY);
                             ctx.rotate(-Math.PI / 4); 
                             
                             ctx.font = 'bold 18px Pretendard';
                             ctx.fillStyle = bgColors[index]; 
                             
-                            // White stroke for readability
                             ctx.strokeStyle = '#ffffff';
                             ctx.lineWidth = 4;
                             ctx.strokeText(`${percentage}%`, 0, 0);
                             ctx.fillText(`${percentage}%`, 0, 0);
                             
                             ctx.rotate(Math.PI / 4);
-                            ctx.translate(-bar.x, -labelY);
+                            ctx.translate(-targetX, -targetY);
                         });
                         ctx.restore();
                     }
@@ -971,7 +1056,7 @@
             charts.disability = new Chart(ctx, config);
         }
 
-        function parseExcelData(data) {
+        function parseExcelData(data, referenceDate) {
             try {
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
@@ -981,7 +1066,7 @@
                 
                 if (jsonData.length === 0) throw new Error("데이터가 없습니다.");
 
-                processData(jsonData);
+                processData(jsonData, referenceDate);
                 
                 const statusMsg = document.getElementById('status-message');
                 statusMsg.innerText = "✅ 데이터 분석 및 렌더링 완료!";
@@ -1012,9 +1097,9 @@
             return age;
         }
 
-        function processData(data) {
-            // 1. Current Date
-            const today = new Date();
+        function processData(data, referenceDate) {
+            // 1. Current Date (파일명 기반 추출 날짜 적용)
+            const today = referenceDate || new Date();
             const yearStr = String(today.getFullYear()).slice(-2);
             const monthStr = String(today.getMonth() + 1).padStart(2, '0');
             const dayStr = String(today.getDate()).padStart(2, '0');
@@ -1023,14 +1108,12 @@
             document.getElementById('val-month').innerText = monthStr;
             document.getElementById('val-day').innerText = dayStr;
 
-            // Set Top Right Date Display
             document.getElementById('top-val-year').innerText = yearStr;
             document.getElementById('top-val-month-day').innerText = `${monthStr}.${dayStr}`;
 
             // 2. Total Count
             document.getElementById('val-current-students').innerText = data.length;
 
-            // Initialize Accumulators
             let genderCount = { '남성': 0, '여성': 0 };
             let regionCount = { '화성시': 0, '화성 외 경기': 0, '서울·인천': 0, '대전·충청': 0, '기타': 0 };
             let ageCount = { '10대': 0, '20대': 0, '30대': 0, '40대': 0, '50대': 0, '60대 이상': 0 };
@@ -1038,7 +1121,6 @@
             let disabilityCount = {};
             DISABILITY_TYPES.forEach(type => disabilityCount[type] = 0);
 
-            // Iterate data rows
             data.forEach(row => {
                 const keys = Object.keys(row);
                 const getVal = (possibleKeys) => {
@@ -1046,12 +1128,10 @@
                     return key ? String(row[key]).trim() : "";
                 };
 
-                // Gender
                 const gender = getVal(['성별']);
                 if (gender.includes('남')) genderCount['남성']++;
                 else if (gender.includes('여')) genderCount['여성']++;
 
-                // Region
                 const address = getVal(['주소', '기본주소']);
                 if (address) {
                     if (address.includes('화성시')) regionCount['화성시']++;
@@ -1061,10 +1141,9 @@
                     else regionCount['기타']++;
                 }
 
-                // Age
                 const birth = getVal(['생년월일', '주민등록번호', '생년']); 
                 if (birth) {
-                    const age = calculateAge(birth, today);
+                    const age = calculateAge(birth, today); // 기준일(today) 기반 나이 계산
                     if (age >= 10 && age < 20) ageCount['10대']++;
                     else if (age >= 20 && age < 30) ageCount['20대']++;
                     else if (age >= 30 && age < 40) ageCount['30대']++;
@@ -1073,22 +1152,18 @@
                     else if (age >= 60) ageCount['60대 이상']++;
                 }
 
-                // Severity
                 const severity = getVal(['중증여부', '장애정도']);
                 if (severity.includes('중증') || severity === '1' || severity === '2' || severity === '3') severityCount['중증']++;
                 else if (severity.includes('경증') || severity === '4' || severity === '5' || severity === '6' || severity.includes('심하지않은')) severityCount['경증']++;
 
-                // Disability
                 const disType = getVal(['장애유형', '유형']);
                 let matched = false;
                 let normalizedDisType = disType;
                 
-                // 보정: 정신지체 -> 지적
                 if (normalizedDisType.includes('정신지체')) {
                     normalizedDisType = normalizedDisType.replace('정신지체', '지적');
                 }
 
-                // 보정: 정신장애를 우선 검사하여 신장장애 오인식 방지
                 const SAFE_CHECK_ORDER = [
                     '정신장애', '뇌병변장애', '장루요루장애', '뇌전증장애', '지적장애', '자폐성장애', '호흡기장애',
                     '지체장애', '시각장애', '청각장애', '언어장애', '안면장애', '신장장애', '심장장애', '간장애'
@@ -1108,7 +1183,6 @@
                 }
             });
 
-            // Trigger rendering
             renderDonutChart('genderChart', 
                 [genderCount['남성'], genderCount['여성']], 
                 ['남성', '여성'], 
@@ -1132,36 +1206,32 @@
             const barData = DISABILITY_TYPES.map(type => disabilityCount[type] || 0);
             renderBarChart('disabilityChart', barData, DISABILITY_TYPES.map(t => {
                 let name = t.replace('장애', '');
-                if (name === '국가유공자') return ['국가', '유공자']; // 두 줄 처리
-                if (name === '장루요루') return '장·요루'; // 샘플 이미지와 동일하게 축약
+                if (name === '국가유공자') return ['국가', '유공자']; 
+                if (name === '장루요루') return '장·요루'; 
                 return name;
             }));
         }
             
-        // Responsive Scaling to prevent scrollbars
         function adjustScale() {
             const wrapper = document.querySelector('.scale-wrapper');
             const container = document.getElementById('infographic-container');
             const targetWidth = 1280;
             const targetHeight = 720;
             
-            // Available space minus padding
             const availableWidth = wrapper.clientWidth - 20;
             const availableHeight = wrapper.clientHeight - 20;
             
             const scaleX = availableWidth / targetWidth;
             const scaleY = availableHeight / targetHeight;
-            const scale = Math.min(scaleX, scaleY, 1.2); // Cap max scale at 1.2x
+            const scale = Math.min(scaleX, scaleY, 1.2); 
             
             container.style.transform = `scale(${scale})`;
         }
         
         window.addEventListener('resize', adjustScale);
         
-        // Initial setup
         window.addEventListener('DOMContentLoaded', () => {
             adjustScale();
-            // Provide empty charts initially
             renderDonutChart('genderChart', [0, 0], ['남성', '여성'], ['#ddd', '#eee']);
             renderDonutChart('regionChart', [0,0,0,0,0], ['-','-','-','-','-'], ['#ddd','#ddd','#ddd','#ddd','#ddd']);
             renderDonutChart('ageChart', [0,0,0,0,0,0], ['-','-','-','-','-','-'], ['#ddd','#ddd','#ddd','#ddd','#ddd','#ddd']);
@@ -1174,7 +1244,6 @@
             }));
         });
 
-        // File Upload Logic
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
 
@@ -1208,32 +1277,35 @@
             document.getElementById('download-btn').classList.add('opacity-50', 'cursor-not-allowed');
             document.getElementById('status-message').innerText = "파일 분석 중...";
 
+            // ★ 엑셀 파일명에서 기준 날짜 추출
+            const extractedDate = extractDateFromFilename(file.name);
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
-                parseExcelData(data);
+                // 추출한 날짜를 parseExcelData로 전달
+                parseExcelData(data, extractedDate); 
             };
             reader.readAsArrayBuffer(file);
         }
 
-        // Download PNG Image
+        // ★ 초고화질(4K) 다운로드 적용
         document.getElementById('download-btn').addEventListener('click', () => {
             const container = document.getElementById('infographic-container');
             const originalTransform = container.style.transform;
 
-            // Remove scale strictly for generating original 1280x720 high-quality output
             container.style.transform = 'scale(1)';
             
             setTimeout(() => {
                 html2canvas(container, {
-                    scale: 2, // Retain FHD quality
+                    scale: 3, // ★ 1280x720 원본의 3배(3840x2160, 4K) 화질로 렌더링. 아주 깨끗하고 안정적입니다.
                     useCORS: true,
                     backgroundColor: '#ffffff',
                     logging: false,
                     width: 1280,
                     height: 720
                 }).then(canvas => {
-                    container.style.transform = originalTransform; // Restore viewport scale
+                    container.style.transform = originalTransform; 
                     
                     const link = document.createElement('a');
                     const dateStr = `${document.getElementById('val-year').innerText}${document.getElementById('val-month').innerText}${document.getElementById('val-day').innerText}`;
